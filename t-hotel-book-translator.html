@@ -1,0 +1,154 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../t-behavior/t-translator-behavior.html">
+<link rel="import" href="../t-shared-lib/t-date-behavior.html">
+<!--
+A comment describing this element
+
+Example:
+
+    <t-hotel-book-translator></t-hotel-book-translator>
+
+@demo demo/index.html
+-->
+
+<dom-module id="t-hotel-book-translator">
+
+    <template></template>
+
+    <script>
+
+        (function () {
+
+            'use strict'
+
+            Polymer({
+                is: 't-hotel-book-translator',
+
+                behaviors: [
+                    TravelNxt.Behaviors.TranslatorBehavior,
+                    TravelNxt.Behaviors.DateBehavior
+                ],
+
+                properties: {
+                    _request : {
+                        type: Object
+                    }
+                },
+
+                /**
+                 * This is the observer function for `input` property.
+                 * It overrides behavior method.
+                 */
+                __translate: function () {
+
+                    if (!this.input) {
+                        throw Error('input field is required');
+                    }
+
+                    this._request = {
+                        inventoriesInfo: [{
+                            id: 0,
+                            passengerIds: [],
+                            paymentIds: [],
+                            leadPassengerId: 0,
+                            paymentBreakups: []
+                        }],
+                        passengers: [],
+                        payments: [],
+                        insuranceInfo: []
+                    };
+
+                    this._buildBookingRequest()
+
+                    this._setOutput(this._request);
+                },
+
+                /*
+                 * <p>Translator</p>
+                 */
+                _buildBookingRequest: function() {
+
+                    this._getPassengers(this.input.passengerInfo);
+
+                    this._getPaymentInfo(this.input.payment);
+
+                    this._getPaymentBreakup(this.input.itinerary.fare.components);
+                },
+
+                /*
+                 * <p>Build passenger data</p>
+                 */
+                _getPassengers: function (passengerInfo) {
+
+                    if (!passengerInfo || !passengerInfo.passengerList) {
+                        return;    
+                    }
+
+                    for (var i = 0; i < passengerInfo.passengerList.length; i++) {
+
+                        var childIndex = 0;
+
+                        this._request.inventoriesInfo[0].passengerIds.push(i);
+
+                        var passenger = passengerInfo.passengerList[i];
+
+                        //logic to populate child ages
+                        if (passenger.type.toLowerCase() === 'adult') {
+                            passenger.age = 25;
+                        } else if (passenger.type.toLowerCase() === 'child') {
+                            passenger.age = this.input.childAges[childIndex].age;
+                            ++childIndex;
+                        }
+
+                        // Building date as per api format
+                        var dt = new Date();
+                        var dateComps = this._getDateComponents(new Date((dt.getFullYear() - passenger.age), dt.getMonth(), dt.getDate()));
+                        var buildDate = dateComps.shortDay + ', ' + dateComps.date + ' ' + dateComps.shortMonth + ',' + dateComps.year;
+
+                        this._request.passengers.push({
+                            firstName: passenger.firstName,
+                            lastName: passenger.lastName,
+                            title: passenger.title,
+                            phoneNumber: passengerInfo.phone,
+                            dateOfBirth: { 
+                                date: buildDate,
+                                time: "12:46 PM"
+                            },
+                            emailAddress: passengerInfo.email,
+                            id: i,
+                            type: passenger.type,
+                            gender: passenger.genderString
+                        });
+                    }
+                },
+
+                /*
+                 * <p>Build payment data</p>
+                 */
+                _getPaymentInfo: function (payment) {
+                    this._request.inventoriesInfo[0].paymentIds.push(0);                    
+                    this._request.payments.push(payment);
+                    payment.id = 0;
+                },
+
+                /*
+                 * <p>Build payment breakup data</p>
+                 */
+                _getPaymentBreakup: function (components) {
+                    var totalFare = components.find(function (component, index, array) {
+                            return component.type.toLowerCase() == 'totalfare';
+                        });
+
+                    if (totalFare) {
+                      this._request.inventoriesInfo[0].paymentBreakups.push({
+                          amount: totalFare.money,
+                          paymentId: 0,
+                          paymentType: 'creditCard',
+                          passengerId: null
+                      });
+                    }
+                }
+            });
+        })();
+    </script>
+</dom-module>
