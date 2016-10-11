@@ -70,9 +70,9 @@ Example:
 
                     this._getPassengers(this.input.passengerInfo);
 
-                    this._getPaymentInfo(this.input.payment);
+                    this._getPaymentInfo(this.input.payment, this.input.breakUp);
 
-                    this._getPaymentBreakup(this.input.itinerary.fare.components);
+                    this._getPaymentBreakup(this.input.breakUp);
                 },
 
                 /*
@@ -125,27 +125,56 @@ Example:
                 /*
                  * <p>Build payment data</p>
                  */
-                _getPaymentInfo: function (payment) {
-                    this._request.inventoriesInfo[0].paymentIds.push(0);                    
-                    this._request.payments.push(payment);
-                    payment.id = 0;
+                _getPaymentInfo: function (payment, breakup) {
+
+                    var paymentId = 0;
+
+                    if (breakup.amount && payment) {
+                        this._request.inventoriesInfo[0].paymentIds.push(paymentId);
+                        payment.id = paymentId++;
+                        this._request.payments.push(payment);
+                    }
+
+                    if (breakup.points) {
+                        request.payments.push({
+                            type: "Points",
+                            id: paymentId
+                        });
+                        request.inventoriesInfo[0].paymentIds.push(paymentId);
+                    }
                 },
 
                 /*
                  * <p>Build payment breakup data</p>
                  */
-                _getPaymentBreakup: function (components) {
-                    var totalFare = components.find(function (component, index, array) {
-                            return component.type.toLowerCase() == 'totalfare';
-                        });
+                _getPaymentBreakup: function (breakup) {
 
-                    if (totalFare) {
-                      this._request.inventoriesInfo[0].paymentBreakups.push({
-                          amount: totalFare.money,
-                          paymentId: 0,
-                          paymentType: 'creditCard',
-                          passengerId: null
-                      });
+                    var paymentId = 0;
+
+                    if (breakup.amount) {
+                        this._request.inventoriesInfo[0].paymentBreakups.push({
+                            amount: {
+                                amount: breakup.amount,
+                                currency: breakup.currency,
+                                displayAmount: breakup.currency + " " + breakup.amount
+                            }
+                            paymentId: paymentId++,
+                            paymentType: 'creditCard',
+                            passengerId: null
+                        });
+                    }
+
+                    if (breakup.points) {
+                        this._request.inventoriesInfo[0].paymentBreakups.push({
+                            amount: {
+                                amount: breakup.points,
+                                currency: "Points",
+                                displayAmount: breakup.points + " Points"
+                            },
+                            paymentId: paymentId,
+                            paymentType: "Points",
+                            passengerId: null
+                        });
                     }
                 }
             });
