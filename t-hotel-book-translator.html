@@ -30,7 +30,7 @@ Example:
                 ],
 
                 properties: {
-                    _request : {
+                    _request: {
                         type: Object
                     }
                 },
@@ -66,7 +66,7 @@ Example:
                 /*
                  * <p>Translator</p>
                  */
-                _buildBookingRequest: function() {
+                _buildBookingRequest: function () {
 
                     this._getPassengers(this.input.passengerInfo);
 
@@ -81,7 +81,7 @@ Example:
                 _getPassengers: function (passengerInfo) {
 
                     if (!passengerInfo || !passengerInfo.passengerList) {
-                        return;    
+                        return;
                     }
 
                     var childIndex = 0;
@@ -110,7 +110,7 @@ Example:
                             lastName: passenger.lastName,
                             title: passenger.title,
                             phoneNumber: passengerInfo.phone,
-                            dateOfBirth: { 
+                            dateOfBirth: {
                                 date: buildDate,
                                 time: "12:46 PM"
                             },
@@ -136,11 +136,11 @@ Example:
                     }
 
                     if (pointsToBeUsed) {
-                        request.payments.push({
+                        this._request.payments.push({
                             type: "Points",
                             id: paymentId
                         });
-                        request.inventoriesInfo[0].paymentIds.push(paymentId);
+                        this._request.inventoriesInfo[0].paymentIds.push(paymentId);
                     }
                 },
 
@@ -157,7 +157,7 @@ Example:
                                 amount: payableByCard,
                                 currency: currency,
                                 displayAmount: currency + " " + payableByCard
-                            }
+                            },
                             paymentId: paymentId++,
                             paymentType: 'creditCard',
                             passengerId: null
