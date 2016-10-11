@@ -70,9 +70,9 @@ Example:
 
                     this._getPassengers(this.input.passengerInfo);
 
-                    this._getPaymentInfo(this.input.payment, this.input.breakUp);
+                    this._getPaymentInfo(this.input.payment, this.input.payableByCard, this.input.pointsToBeUsed);
 
-                    this._getPaymentBreakup(this.input.breakUp);
+                    this._getPaymentBreakup(this.input.payableByCard, this.input.pointsToBeUsed, this.input.currency);
                 },
 
                 /*
@@ -125,17 +125,17 @@ Example:
                 /*
                  * <p>Build payment data</p>
                  */
-                _getPaymentInfo: function (payment, breakup) {
+                _getPaymentInfo: function (payment, payableByCard, pointsToBeUsed) {
 
                     var paymentId = 0;
 
-                    if (breakup.amount && payment) {
+                    if (payableByCard && payment) {
                         this._request.inventoriesInfo[0].paymentIds.push(paymentId);
                         payment.id = paymentId++;
                         this._request.payments.push(payment);
                     }
 
-                    if (breakup.points) {
+                    if (pointsToBeUsed) {
                         request.payments.push({
                             type: "Points",
                             id: paymentId
@@ -147,16 +147,16 @@ Example:
                 /*
                  * <p>Build payment breakup data</p>
                  */
-                _getPaymentBreakup: function (breakup) {
+                _getPaymentBreakup: function (payableByCard, pointsToBeUsed, currency) {
 
                     var paymentId = 0;
 
-                    if (breakup.amount) {
+                    if (payableByCard) {
                         this._request.inventoriesInfo[0].paymentBreakups.push({
                             amount: {
-                                amount: breakup.amount,
-                                currency: breakup.currency,
-                                displayAmount: breakup.currency + " " + breakup.amount
+                                amount: payableByCard,
+                                currency: currency,
+                                displayAmount: currency + " " + payableByCard
                             }
                             paymentId: paymentId++,
                             paymentType: 'creditCard',
@@ -164,12 +164,12 @@ Example:
                         });
                     }
 
-                    if (breakup.points) {
+                    if (pointsToBeUsed) {
                         this._request.inventoriesInfo[0].paymentBreakups.push({
                             amount: {
-                                amount: breakup.points,
+                                amount: pointsToBeUsed,
                                 currency: "Points",
-                                displayAmount: breakup.points + " Points"
+                                displayAmount: pointsToBeUsed + " Points"
                             },
                             paymentId: paymentId,
                             paymentType: "Points",
