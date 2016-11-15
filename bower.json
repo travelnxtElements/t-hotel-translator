@@ -2,7 +2,7 @@
   "name": "t-hotel-translator",
   "description": "t-hotel-translator has all the translator component used in hotel search to book flow. Translator components are used to translate view component response into api component compatible requests.",
   "main": "t-hotel-translator.html",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.4.0",
     "t-behavior": "travelnxtelements/t-behavior#^1.0.0",
